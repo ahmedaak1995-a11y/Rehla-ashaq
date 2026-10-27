@@ -47,7 +47,8 @@ fun HomeScreen(
     onNavigateToMakroohat: () -> Unit,
     onNavigateToTasbeeh: () -> Unit,
     onNavigateToDuas: () -> Unit,
-    onNavigateToBookmarks: () -> Unit
+    onNavigateToBookmarks: () -> Unit,
+    onNavigateToAi: () -> Unit
 ) {
     val context = LocalContext.current
     val lastChapterId by preferencesManager.lastChapterId.collectAsState()
@@ -201,6 +202,90 @@ fun HomeScreen(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
+                }
+            }
+        }
+
+        // Gemini AI Spiritual Companion Banner
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable { onNavigateToAi() }
+                    .testTag("btn_nav_ai_banner"),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                border = CardDefaults.outlinedCardBorder().copy(
+                    brush = Brush.linearGradient(
+                        colors = listOf(GoldSecondary, EmeraldPrimary)
+                    )
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(EmeraldPrimary, GoldSecondary)
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "المرشد الروحاني Gemini",
+                            tint = Color.White,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "المرشد الروحاني",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = GoldSecondary.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "Gemini AI",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = GoldSecondary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "استشر الذكاء الاصطناعي في تزكية النفس ومقامات كتاب رحلة عشق",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                            lineHeight = 16.sp
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = null,
+                        tint = GoldSecondary
+                    )
                 }
             }
         }

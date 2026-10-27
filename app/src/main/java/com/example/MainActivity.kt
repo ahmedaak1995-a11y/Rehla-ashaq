@@ -18,11 +18,14 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.PreferencesManager
 import com.example.ui.screens.*
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.RehlatIshqTheme
+import com.example.ui.viewmodel.SpiritualAiViewModel
+import com.example.util.configureAppCheck
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -33,6 +36,7 @@ sealed class Screen(val route: String) {
     object Tasbeeh : Screen("tasbeeh")
     object Duas : Screen("duas")
     object Bookmarks : Screen("bookmarks")
+    object Ai : Screen("ai")
     data class Reader(val chapterId: String, val sectionIndex: Int = 0) : Screen("reader")
 }
 
@@ -46,6 +50,10 @@ data class NavItem(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // STEP 1: Configure App Check with launch intent before any UI, ViewModels, or Firebase calls
+        configureAppCheck(this, intent)
+
         enableEdgeToEdge()
         val preferencesManager = PreferencesManager(applicationContext)
 
@@ -61,20 +69,21 @@ class MainActivity : ComponentActivity() {
                 // Ensure RTL layout for authentic Arabic typography and reading flow
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+                    val aiViewModel: SpiritualAiViewModel = viewModel()
 
                     val navItems = listOf(
                         NavItem("الرئيسية", Icons.Default.Home, Screen.Home, "bottom_nav_home"),
                         NavItem("الرحلات", Icons.Default.AutoStories, Screen.Journeys, "bottom_nav_journeys"),
                         NavItem("جرد الملكات", Icons.Default.EditNote, Screen.Virtues, "bottom_nav_virtues"),
                         NavItem("المسبحة", Icons.Default.TouchApp, Screen.Tasbeeh, "bottom_nav_tasbeeh"),
-                        NavItem("الكمالات", Icons.Default.Stars, Screen.Kamalat, "bottom_nav_kamalat")
+                        NavItem("المرشد AI", Icons.Default.AutoAwesome, Screen.Ai, "bottom_nav_ai")
                     )
 
                     val isTopLevel = currentScreen is Screen.Home ||
                             currentScreen is Screen.Journeys ||
                             currentScreen is Screen.Virtues ||
-                            currentScreen is Screen.Kamalat ||
-                            currentScreen is Screen.Tasbeeh
+                            currentScreen is Screen.Tasbeeh ||
+                            currentScreen is Screen.Ai
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
@@ -130,7 +139,8 @@ class MainActivity : ComponentActivity() {
                                         onNavigateToMakroohat = { currentScreen = Screen.Makroohat },
                                         onNavigateToTasbeeh = { currentScreen = Screen.Tasbeeh },
                                         onNavigateToDuas = { currentScreen = Screen.Duas },
-                                        onNavigateToBookmarks = { currentScreen = Screen.Bookmarks }
+                                        onNavigateToBookmarks = { currentScreen = Screen.Bookmarks },
+                                        onNavigateToAi = { currentScreen = Screen.Ai }
                                     )
                                 }
                                 is Screen.Journeys -> {
@@ -178,6 +188,12 @@ class MainActivity : ComponentActivity() {
                                         }
                                     )
                                 }
+                                is Screen.Ai -> {
+                                    SpiritualAiScreen(
+                                        viewModel = aiViewModel,
+                                        onBackClick = { currentScreen = Screen.Home }
+                                    )
+                                }
                                 is Screen.Reader -> {
                                     BookReaderScreen(
                                         chapterId = screen.chapterId,
@@ -195,5 +211,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        configureAppCheck(this, intent)
     }
 }
